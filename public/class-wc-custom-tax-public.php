@@ -100,4 +100,64 @@ class Wc_Custom_Tax_Public {
 
 	}
 
+	/**
+	 * Gets the tax rates from the taxes.json file
+	 * 
+	 * @since 1.0.0
+	 */
+	private function wc_get_taxrates() {
+		$taxrates_file = plugin_dir_path( __DIR__ ) . 'includes/taxes.json';
+		$taxrates_contents = file_get_contents($taxrates_file);
+		return json_decode($taxrates_contents);
+	}
+
+	/**
+	 * Gets the product category slug name based on category id
+	 * 
+	 * @since 1.0.0
+	 */
+	private function wc_get_category_name($id) {
+		if( $term = get_term_by( 'id', $id, 'product_cat' ) ){
+    	return $term->name;
+		}
+	} 
+
+	/**
+	 * Adds the custom taxes defined in includes/taxes.json to the checkout in woocommerce
+	 * 
+	 * @since 1.0.0
+	 */
+	public function wc_add_custom_taxes() {
+		global $woocommerce;
+ 
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) )
+			return;
+		
+		$tax_amount = 0;
+		$tax_rates = $this->wc_get_taxrates();
+		$cart_items = $woocommerce->cart->get_cart();
+		
+		var_dump($cart_items);
+		foreach ($cart_items as $cart_item) {
+		}
+
+		// if ( in_array( $woocommerce->customer->get_shipping_country(), $country ) ) {
+		// 	$surcharge = ( $woocommerce->cart->cart_contents_total + $woocommerce->cart->shipping_total ) * $percentage;
+		// }
+		if ($tax_amount > 0) {
+			$woocommerce->cart->add_fee( 'Additional Taxes', $tax_amount, true, '' );
+		}
+
+		// Create a variable to hold the surcharge tax amount
+		// Get a list of all products
+		// Loop through products
+			// Determine the product category
+			// Check if product cateogry is in taxes.json
+			// If it is, determine if billing address state is listed in tax 	rates property
+			// Calculate the tax amount based on cost of goods
+			// Append tax amount to surcharge variable
+		// Add surcharge to cart fee
+		
+	}
+
 }

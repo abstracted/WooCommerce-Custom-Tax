@@ -144,6 +144,16 @@ class Wc_Custom_Tax {
 	}
 
 	/**
+	 * Check if woocommerce is installed and active
+	 * 
+	 * @since 1.0.0
+	 * @access private
+	 */
+	private function woocommerce_exists() {
+		return in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) );
+	}
+
+	/**
 	 * Register all of the hooks related to the admin area functionality
 	 * of the plugin.
 	 *
@@ -172,6 +182,10 @@ class Wc_Custom_Tax {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+		if ($this->woocommerce_exists()) {
+			$this->loader->add_action( 'woocommerce_cart_calculate_fees', $plugin_public, 'wc_add_custom_taxes' );
+		}
 
 	}
 
