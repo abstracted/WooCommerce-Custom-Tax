@@ -13,9 +13,9 @@
  * @package           Wc_Custom_Tax
  *
  * @wordpress-plugin
- * Plugin Name:       Woocommerce Custom Tax
+ * Plugin Name:       WooCommerce Custom Tax
  * Plugin URI:        cameron.computer
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       A plugin to add custom state-based tax rates to specific product categories.
  * Version:           1.0.0
  * Author:            Cameron Sanders
  * Author URI:        cameron.computer

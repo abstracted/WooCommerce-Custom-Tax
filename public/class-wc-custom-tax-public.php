@@ -150,7 +150,8 @@ class Wc_Custom_Tax_Public {
 		$cart_product_categories = [];
 		foreach ($cart_items as $cart_item) {
 			$quantity = $cart_item['quantity'];
-			$product = $cart_item['data'];
+			$product_id = $cart_item['product_id'];
+			$product = wc_get_product($product_id);
 			$product_category_ids = $product->get_category_ids();
 			for ($i = 0; $i < $quantity; $i++) {
 				foreach ($product_category_ids as $id) {
@@ -187,7 +188,6 @@ class Wc_Custom_Tax_Public {
 	 */
 	public function wc_add_custom_taxes() {
 		global $woocommerce;
-
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			return;
 		}
