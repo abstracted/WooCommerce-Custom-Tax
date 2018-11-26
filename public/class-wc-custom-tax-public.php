@@ -101,7 +101,7 @@ class Wc_Custom_Tax_Public {
 	}
 
 	/**
-	 * Gets the tax rates from the taxes.json file
+	 * Returns the tax rates from the taxes.json file
 	 * 
 	 * @since 1.0.0
 	 */
@@ -112,52 +112,94 @@ class Wc_Custom_Tax_Public {
 	}
 
 	/**
-	 * Gets the product category slug name based on category id
+	 * Return boolean for customer is in State with custom tax
+	 * @since 1.0.0
+	 */
+	private function wc_is_taxable_state($billing_state) {
+		$is_taxable_state = false;
+		foreach ($this->wc_get_taxrates() as $category) {
+			foreach (get_object_vars($category->tax_rate) as $state => $tax_rate) {
+				if ($billing_state === $state) {
+					$is_taxable_state = true;
+				}
+				if ($is_taxable_state === true) {
+					break;
+				}
+			}
+		}
+		return $is_taxable_state;
+	}
+
+	/**
+	 * Returns the product category slug name based on category id
 	 * 
 	 * @since 1.0.0
 	 */
 	private function wc_get_category_name($id) {
 		if( $term = get_term_by( 'id', $id, 'product_cat' ) ){
-    	return $term->name;
+    	return $term->slug;
 		}
-	} 
+	}
 
 	/**
-	 * Adds the custom taxes defined in includes/taxes.json to the checkout in woocommerce
+	 * Returns a flat array with all product categories for the items in the cart
+	 * 
+	 * @since 1.0.0
+	 */
+	private function wc_get_cart_product_categories($cart_items) {
+		$cart_product_categories = [];
+		foreach ($cart_items as $cart_item) {
+			$quantity = $cart_item['quantity'];
+			$product = $cart_item['data'];
+			$product_category_ids = $product->get_category_ids();
+			for ($i = 0; $i < $quantity; $i++) {
+				foreach ($product_category_ids as $id) {
+					array_push($cart_product_categories, $this->wc_get_category_name($id));
+				}
+			}
+		}
+		return $cart_product_categories;
+	}
+
+	/**
+	 * Returns additional tax amount to be added to checkout, calculates tax rates in process
+	 * 
+	 * @since 1.0.0
+	 */
+	private function wc_get_tax_amount($product_categories, $billing_state) {
+		$tax_amount = 0;
+		foreach ($product_categories as $product_category) {
+			foreach ($this->wc_get_taxrates() as $category_name => $category_data) {
+				if ($product_category === $category_name) {
+					$tax_rate = get_object_vars($category_data->tax_rate)[$billing_state];
+					$cost_of_goods = $category_data->cost_of_goods;
+					$tax_amount += $cost_of_goods * $tax_rate;
+				}
+			}
+		}
+		return $tax_amount;
+	}
+
+	/**
+	 * Adds the additional taxes defined in includes/taxes.json to the checkout in woocommerce
 	 * 
 	 * @since 1.0.0
 	 */
 	public function wc_add_custom_taxes() {
 		global $woocommerce;
- 
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) )
+
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			return;
-		
-		$tax_amount = 0;
-		$tax_rates = $this->wc_get_taxrates();
-		$cart_items = $woocommerce->cart->get_cart();
-		
-		var_dump($cart_items);
-		foreach ($cart_items as $cart_item) {
 		}
-
-		// if ( in_array( $woocommerce->customer->get_shipping_country(), $country ) ) {
-		// 	$surcharge = ( $woocommerce->cart->cart_contents_total + $woocommerce->cart->shipping_total ) * $percentage;
-		// }
-		if ($tax_amount > 0) {
-			$woocommerce->cart->add_fee( 'Additional Taxes', $tax_amount, true, '' );
-		}
-
-		// Create a variable to hold the surcharge tax amount
-		// Get a list of all products
-		// Loop through products
-			// Determine the product category
-			// Check if product cateogry is in taxes.json
-			// If it is, determine if billing address state is listed in tax 	rates property
-			// Calculate the tax amount based on cost of goods
-			// Append tax amount to surcharge variable
-		// Add surcharge to cart fee
 		
+		$billing_state = $woocommerce->customer->get_billing_state();
+		if ($this->wc_is_taxable_state($billing_state)) {
+			$cart_items = $woocommerce->cart->get_cart();
+			$cart_product_categories = $this->wc_get_cart_product_categories($cart_items);
+			$tax_amount = $this->wc_get_tax_amount($cart_product_categories, $billing_state);
+			if ($tax_amount > 0) {
+				$woocommerce->cart->add_fee( 'Additional Taxes', $tax_amount, true, '' );
+			}
+		}
 	}
-
 }
