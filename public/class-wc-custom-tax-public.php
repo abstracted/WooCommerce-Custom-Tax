@@ -198,7 +198,7 @@ class Wc_Custom_Tax_Public {
 			$cart_product_categories = $this->wc_get_cart_product_categories($cart_items);
 			$tax_amount = $this->wc_get_tax_amount($cart_product_categories, $billing_state);
 			if ($tax_amount > 0) {
-				$woocommerce->cart->add_fee( 'Additional Taxes', $tax_amount, true, '' );
+				$woocommerce->cart->add_fee( 'Additional Taxes', $tax_amount, false, '' );
 			}
 		}
 	}
