@@ -1,0 +1,14 @@
+{
+  "salts": {
+    "cost_of_goods": 2.40,
+    "tax_rate": {
+      "CA": 0.62
+    }
+  },
+  "e-juice-bottles": {
+    "cost_of_goods": 2.20,
+    "tax_rate": {
+      "CA": 0.62
+    }
+  }
+}
